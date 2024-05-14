@@ -18,9 +18,7 @@ async function aiRun(prompt, languageCode) {
 }
 
 function getPrompt(search) {
-  return `
-
-    
+  return ` 
   Q:
   다슈
   

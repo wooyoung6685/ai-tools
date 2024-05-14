@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import LoadingBar from './LoadingBar';
@@ -28,7 +28,7 @@ const Label = styled.label`
 `;
 
 const Input = styled.input`
-  width: 200px;
+width: 200px;
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 4px;
@@ -49,9 +49,11 @@ const Button = styled.button`
   }
 `;
 
-const ButtonWrapper = styled.div``;
+const ButtonWrapper = styled.div`
 
-const Gemini = () => {
+`
+
+function Test() {
   const [brandName, setBrandName] = useState('');
   const [subtitles, setSubtitles] = useState([
     "브랜드 역사 및 가치",
@@ -63,9 +65,6 @@ const Gemini = () => {
   const [newSubtitle, setNewSubtitle] = useState('');
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_KEY);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
   const handleBrandChange = (event) => {
     setBrandName(event.target.value);
@@ -89,21 +88,39 @@ const Gemini = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
-    const apiResponses = await Promise.all(subtitles.map(async (subtitle) => {
-      const prompt = `${brandName} 에대한 ${subtitle}`;
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = await response.text();
-      return text;
-    }));
+    setLoading(true); // 로딩 시작
+    const apiResponses = await Promise.all(subtitles.map(subtitle => 
+      axios.post('https://api.openai.com/v1/chat/completions', {
+        messages:[
+            {
+            role: "system",
+            content: "The answer is set in Korean, and List the texts that respond to me in a readable manner to the user,and Markdown format"
+          },
+          {
+            role: "system",
+            content: "You are in charge of e-commerce and need to list the information to explain to the client"
+          },
+          {
+            role: "user",
+            content: `${brandName} ${subtitle}`
+          },
+        ],
+        model: "gpt-4",
+        max_tokens: 600
+      }, {
+        headers: {
+          'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
+        }
+      }).then(response => response.data.choices[0].message.content)
+        .catch(error => console.error('Error:', error))
+    ));
     setResponses(apiResponses);
-    setLoading(false);
+    setLoading(false); // 로딩 종료
   };
 
   return (
     <Container>
-      <Title>Gemini Brand Information</Title>
+  <Title>GPT Brand Information</Title>
       <Form onSubmit={handleSubmit}>
         <Label>
           브랜드명:
@@ -123,7 +140,7 @@ const Gemini = () => {
           <Button type="button" onClick={handleAddSubtitle}>추가</Button>
         </Label>
         <ButtonWrapper>
-          <Button type="submit">정보 요청</Button>
+        <Button type="submit">정보 요청</Button>
         </ButtonWrapper>
       </Form>
       <div>
@@ -139,6 +156,6 @@ const Gemini = () => {
       </div>
     </Container>
   );
-};
+}
 
-export default Gemini;
+export default Test;

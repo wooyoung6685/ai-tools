@@ -2,7 +2,7 @@ import React from 'react'
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { fetchChatResponse } from './api/chatApi';
-function ChatGpt() {
+const ChatGpt= () =>  {
   const [query, setQuery] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
