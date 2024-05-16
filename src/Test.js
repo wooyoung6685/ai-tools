@@ -77,6 +77,7 @@ function Test() {
   };
 
   const handleAddSubtitle = () => {
+    if (newSubtitle.trim() === '') return; 
     setSubtitles([...subtitles, newSubtitle]);
     setNewSubtitle('');
   };
@@ -120,7 +121,7 @@ function Test() {
 
   return (
     <Container>
-  <Title>GPT Brand Information</Title>
+  <Title>GPT 브랜드 정보요청</Title>
       <Form onSubmit={handleSubmit}>
         <Label>
           브랜드명:
@@ -137,10 +138,10 @@ function Test() {
         ))}
         <Label>
           <Input type="text" value={newSubtitle} onChange={(e) => setNewSubtitle(e.target.value)} placeholder="새 소제목 추가" />
-          <Button type="button" onClick={handleAddSubtitle}>추가</Button>
+          <Button type="button" onClick={handleAddSubtitle} >추가</Button>
         </Label>
         <ButtonWrapper>
-        <Button type="submit">정보 요청</Button>
+        <Button type="submit" disabled={!brandName}>정보 요청</Button>
         </ButtonWrapper>
       </Form>
       <div>

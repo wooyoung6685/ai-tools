@@ -78,6 +78,7 @@ const Gemini = () => {
   };
 
   const handleAddSubtitle = () => {
+    if (newSubtitle.trim() === '') return; 
     setSubtitles([...subtitles, newSubtitle]);
     setNewSubtitle('');
   };
@@ -103,7 +104,7 @@ const Gemini = () => {
 
   return (
     <Container>
-      <Title>Gemini Brand Information</Title>
+      <Title>Gemini 브랜드 정보요청</Title>
       <Form onSubmit={handleSubmit}>
         <Label>
           브랜드명:
@@ -123,7 +124,7 @@ const Gemini = () => {
           <Button type="button" onClick={handleAddSubtitle}>추가</Button>
         </Label>
         <ButtonWrapper>
-          <Button type="submit">정보 요청</Button>
+        <Button type="submit" disabled={!brandName}>정보 요청</Button>
         </ButtonWrapper>
       </Form>
       <div>
