@@ -6,7 +6,7 @@ import LoadingBar from './LoadingBar';
 
 const Container = styled.div`
   padding: 20px;
-  max-width: 600px;
+  width: 600px;
   margin: 40px auto;
   background-color: #f4f4f9;
   border-radius: 8px;
@@ -50,6 +50,17 @@ const Button = styled.button`
 `;
 
 const ButtonWrapper = styled.div``;
+
+const ResponseContainer = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+`;
+
+const LoadingContainer = styled.div`
+  margin-top: 20px;
+`;
 
 const Gemini = () => {
   const [brandName, setBrandName] = useState('');
@@ -127,17 +138,21 @@ const Gemini = () => {
         <Button type="submit" disabled={!brandName}>정보 요청</Button>
         </ButtonWrapper>
       </Form>
-      <div>
       {loading ? (
+        <LoadingContainer>
           <LoadingBar />
-        ) : (
-          responses.map((response, index) => (
-            <div key={index}>
-              <ReactMarkdown>{response}</ReactMarkdown>
-            </div>
-          ))
-        )}
-      </div>
+        </LoadingContainer>
+      ) : (
+        responses.length > 0 && (
+          <ResponseContainer>
+            {responses.map((response, index) => (
+              <div key={index}>
+                <ReactMarkdown>{response}</ReactMarkdown>
+              </div>
+            ))}
+          </ResponseContainer>
+        )
+      )}
     </Container>
   );
 };

@@ -6,7 +6,7 @@ import LoadingBar from './LoadingBar';
 
 const Container = styled.div`
   padding: 20px;
-  max-width: 600px;
+  width: 600px;
   margin: 40px auto;
   background-color: #f4f4f9;
   border-radius: 8px;
@@ -28,7 +28,7 @@ const Label = styled.label`
 `;
 
 const Input = styled.input`
-width: 200px;
+  width: 200px;
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 4px;
@@ -49,9 +49,18 @@ const Button = styled.button`
   }
 `;
 
-const ButtonWrapper = styled.div`
+const ButtonWrapper = styled.div``;
 
-`
+const ResponseContainer = styled.div`
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+`;
+
+const LoadingContainer = styled.div`
+  margin-top: 20px;
+`;
 
 function Test() {
   const [brandName, setBrandName] = useState('');
@@ -121,7 +130,7 @@ function Test() {
 
   return (
     <Container>
-  <Title>GPT 브랜드 정보요청</Title>
+      <Title>GPT 브랜드 정보요청</Title>
       <Form onSubmit={handleSubmit}>
         <Label>
           브랜드명:
@@ -138,23 +147,27 @@ function Test() {
         ))}
         <Label>
           <Input type="text" value={newSubtitle} onChange={(e) => setNewSubtitle(e.target.value)} placeholder="새 소제목 추가" />
-          <Button type="button" onClick={handleAddSubtitle} >추가</Button>
+          <Button type="button" onClick={handleAddSubtitle}>추가</Button>
         </Label>
         <ButtonWrapper>
-        <Button type="submit" disabled={!brandName}>정보 요청</Button>
+          <Button type="submit" disabled={!brandName}>정보 요청</Button>
         </ButtonWrapper>
       </Form>
-      <div>
       {loading ? (
+        <LoadingContainer>
           <LoadingBar />
-        ) : (
-          responses.map((response, index) => (
-            <div key={index}>
-              <ReactMarkdown>{response}</ReactMarkdown>
-            </div>
-          ))
-        )}
-      </div>
+        </LoadingContainer>
+      ) : (
+        responses.length > 0 && (
+          <ResponseContainer>
+            {responses.map((response, index) => (
+              <div key={index}>
+                <ReactMarkdown>{response}</ReactMarkdown>
+              </div>
+            ))}
+          </ResponseContainer>
+        )
+      )}
     </Container>
   );
 }
