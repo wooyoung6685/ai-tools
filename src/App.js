@@ -4,6 +4,7 @@ import { Container } from './styled';
 import Navbar from './Navbar';
 import Test from './Test';
 import Gemini from './Gemini';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const App = () => {
   return (

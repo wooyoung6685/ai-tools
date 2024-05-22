@@ -3,6 +3,9 @@ import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import LoadingBar from './LoadingBar';
+import * as XLSX from 'xlsx'; // SheetJS 라이브러리 import
+import { remark } from 'remark';
+import remarkHtml from 'remark-html';
 
 const Container = styled.div`
   padding: 20px;
@@ -22,6 +25,7 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
 `;
+
 
 const Label = styled.label`
   margin-bottom: 10px;
@@ -86,7 +90,7 @@ function Test() {
   };
 
   const handleAddSubtitle = () => {
-    if (newSubtitle.trim() === '') return; 
+    if (newSubtitle.trim() === '') return;
     setSubtitles([...subtitles, newSubtitle]);
     setNewSubtitle('');
   };
@@ -99,12 +103,12 @@ function Test() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true); // 로딩 시작
-    const apiResponses = await Promise.all(subtitles.map(subtitle => 
+    const apiResponses = await Promise.all(subtitles.map(subtitle =>
       axios.post('https://api.openai.com/v1/chat/completions', {
-        messages:[
-            {
+        messages: [
+          {
             role: "system",
-            content: "The answer is set in Korean, and List the texts that respond to me in a readable manner to the user,and Markdown format"
+            content: "The answer is set in Korean, and List the texts that respond to me in a readable manner to the user, and Markdown format"
           },
           {
             role: "system",
@@ -126,6 +130,54 @@ function Test() {
     ));
     setResponses(apiResponses);
     setLoading(false); // 로딩 종료
+  };
+
+  const handleDownloadExcel = () => {
+    const dataForExcel = responses.map((response, index) => {
+      const processedResponse = remark()
+        .use(remarkHtml)
+        .processSync(response)
+        .toString();
+
+      return {
+        Subtitle: subtitles[index],
+        Response: processedResponse.replace(/<\/?[^>]+(>|$)/g, '') // HTML 태그 제거
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataForExcel, { header: ["Subtitle", "Response"], skipHeader: false });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Responses');
+
+    // 스타일 지정
+    const wscols = [
+      { wch: 30 }, // Subtitle 컬럼 너비
+      { wch: 100 } // Response 컬럼 너비
+    ];
+    worksheet['!cols'] = wscols;
+
+    // 셀 스타일 적용
+    const range = XLSX.utils.decode_range(worksheet['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell_address = { c: C, r: R };
+        const cell_ref = XLSX.utils.encode_cell(cell_address);
+        if (!worksheet[cell_ref]) continue;
+        if (R === 0) {
+          worksheet[cell_ref].s = {
+            font: { bold: true },
+            alignment: { horizontal: "center", vertical: "center" }
+          };
+        } else {
+          worksheet[cell_ref].s = {
+            alignment: { wrapText: true, vertical: "top" }
+          };
+        }
+      }
+    }
+
+    // Save the workbook
+    XLSX.writeFile(workbook, 'brand_responses.xlsx');
   };
 
   return (
@@ -165,6 +217,7 @@ function Test() {
                 <ReactMarkdown>{response}</ReactMarkdown>
               </div>
             ))}
+            <Button onClick={handleDownloadExcel}>엑셀로 다운로드</Button>
           </ResponseContainer>
         )
       )}
